@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Fish Medicine Store</title>
+    
+    <!-- Tailwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    
+    <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold text-center mb-8">অ্যাডমিন লগইন</h1>
+        
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-6">
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">ইউজারনেম</span>
+                </label>
+                <input type="text" id="username" class="input input-bordered" required>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">পাসওয়ার্ড</span>
+                </label>
+                <input type="password" id="password" class="input input-bordered" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-full">লগইন</button>
+        </form>
+        
+        <div class="mt-4">
+            <a href="index.html" class="link link-primary">হোম পেজে ফিরে যান</a>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Updated admin credentials
+            if (username === 'eneryagrobd.com' && password === 'energyagrobd@123') {
+                // Store login status
+                localStorage.setItem('adminLoggedIn', 'true');
+                
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                alert('ভুল ইউজারনেম অথবা পাসওয়ার্ড!');
+            }
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('adminLoggedIn') === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

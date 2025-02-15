@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Fish Medicine Store</title>
+    
+    <!-- Tailwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">অর্ডার ড্যাশবোর্ড</h1>
+            <div class="flex gap-4">
+                <button onclick="refreshOrders()" class="btn btn-primary">
+                    <i class="fas fa-sync-alt mr-2"></i> রিফ্রেশ
+                </button>
+                <button onclick="handleLogout()" class="btn btn-error">
+                    <i class="fas fa-sign-out-alt mr-2"></i> লগআউট
+                </button>
+                <a href="index.html" class="btn">
+                    <i class="fas fa-home mr-2"></i> হোম
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="stat bg-white shadow rounded-lg">
+                <div class="stat-title">মোট অর্ডার</div>
+                <div class="stat-value" id="totalOrders">0</div>
+            </div>
+            <div class="stat bg-white shadow rounded-lg">
+                <div class="stat-title">আজকের অর্ডার</div>
+                <div class="stat-value" id="todayOrders">0</div>
+            </div>
+            <div class="stat bg-white shadow rounded-lg">
+                <div class="stat-title">মোট বিক্রয়</div>
+                <div class="stat-value" id="totalSales">৳0</div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white shadow rounded-lg overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>তারিখ</th>
+                        <th>কাস্টমার</th>
+                        <th>ফোন</th>
+                        <th>ঠিকানা</th>
+                        <th>পণ্যসমূহ</th>
+                        <th>পরিমাণ</th>
+                        <th>মোট মূল্য</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <!-- Orders will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Check if admin is logged in
+        if (localStorage.getItem('adminLoggedIn') !== 'true') {
+            window.location.href = 'admin-login.html';
+        }
+
+        // Auto refresh every 5 seconds
+        setInterval(loadOrders, 5000);
+
+        // Add a visual countdown timer
+        let countdown = 5;
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            const refreshBtn = document.querySelector('button[onclick="refreshOrders()"]');
+            refreshBtn.innerHTML = `<i class="fas fa-sync-alt mr-2"></i> রিফ্রেশ (${countdown}s)`;
+            
+            if (countdown <= 0) {
+                countdown = 5;
+            }
+        }, 1000);
+
+        // Update the refresh button function
+        function refreshOrders() {
+            countdown = 5; // Reset countdown on manual refresh
+            loadOrders();
+        }
+
+        // Load orders from database
+        async function loadOrders() {
+            try {
+                const response = await fetch('http://localhost:5000/api/orders');
+                const orders = await response.json();
+                
+                // Update stats
+                document.getElementById('totalOrders').textContent = orders.length;
+                
+                const today = new Date().toDateString();
+                const todayOrders = orders.filter(order => 
+                    new Date(order.orderDate).toDateString() === today
+                ).length;
+                document.getElementById('todayOrders').textContent = todayOrders;
+                
+                const totalSales = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+                document.getElementById('totalSales').textContent = '৳' + totalSales;
+
+                // Update table
+                const tableBody = document.getElementById('ordersTableBody');
+                tableBody.innerHTML = '';
+                
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(order.orderDate).toLocaleString('bn-BD')}</td>
+                        <td>${order.customerName || 'N/A'}</td>
+                        <td>${order.phone || 'N/A'}</td>
+                        <td>${order.address || 'N/A'}</td>
+                        <td>
+                            <ul class="list-disc list-inside">
+                                ${order.items.map(item => `
+                                    <li>${item.name} (${item.size})</li>
+                                `).join('')}
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class="list-none">
+                                ${order.items.map(item => `
+                                    <li>${item.quantity}টি</li>
+                                `).join('')}
+                            </ul>
+                        </td>
+                        <td>৳${order.totalAmount}</td>
+                        <td>
+                            <button onclick="deleteOrder('${order._id}')" class="btn btn-error btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                alert('অর্ডার লোড করতে সমস্যা হয়েছে!');
+            }
+        }
+
+        // Delete order
+        async function deleteOrder(orderId) {
+            if (confirm('আপনি কি নিশ্চিত যে এই অর্ডারটি মুছে ফেলতে চান?')) {
+                try {
+                    const response = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        loadOrders(); // Refresh the table
+                    } else {
+                        throw new Error('Delete failed');
+                    }
+                } catch (error) {
+                    console.error('Error deleting order:', error);
+                    alert('অর্ডার মুছতে সমস্যা হয়েছে!');
+                }
+            }
+        }
+
+        // Refresh orders
+        function refreshOrders() {
+            loadOrders();
+        }
+
+        // Load orders when page loads
+        loadOrders();
+
+        function handleLogout() {
+            if (confirm('আপনি কি লগআউট করতে চান?')) {
+                localStorage.removeItem('adminLoggedIn');
+                window.location.href = 'admin-login.html';
+            }
+        }
+    </script>
+</body>
+</html>
