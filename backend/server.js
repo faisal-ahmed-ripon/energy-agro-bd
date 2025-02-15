@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,6 +11,17 @@ app.use(cors());  // সব origin থেকে request allow করবে
 
 // Middleware
 app.use(express.json());
+
+// MongoDB Connect Function
+mongoose.set('strictQuery', false);
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log("✅ MongoDB Connected Successfully!");
+}).catch(err => {
+    console.error("❌ MongoDB Connection Error:", err);
+});
 
 // Orders API endpoint
 app.post('/api/orders', async (req, res) => {
@@ -29,21 +41,6 @@ app.post('/api/orders', async (req, res) => {
         });
     }
 });
-
-// MongoDB connection
-mongoose.connect('mongodb://127.0.0.1:27017/fishMedicineStore', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.error('MongoDB Connection Error:', err));
-
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
-// ... existing code ...
 
 // Get all orders
 app.get('/api/orders', async (req, res) => {
@@ -65,4 +62,7 @@ app.delete('/api/orders/:id', async (req, res) => {
     }
 });
 
-// ... existing code ...
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
