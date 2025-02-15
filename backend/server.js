@@ -14,14 +14,14 @@ app.use(express.json());
 
 // MongoDB Connect Function
 mongoose.set('strictQuery', false);
-mongoose.connect(process.env.MONGODB_URI, {
+
+const uri = process.env.MONGODB_URI || process.env.MONGODB_URI_LOCAL;
+mongoose.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => {
-    console.log("✅ MongoDB Connected Successfully!");
-}).catch(err => {
-    console.error("❌ MongoDB Connection Error:", err);
-});
+})
+.then(() => console.log("✅ MongoDB Connected Successfully!"))
+.catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 // Orders API endpoint
 app.post('/api/orders', async (req, res) => {
@@ -66,4 +66,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
-mongoose.set('strictQuery', true);
