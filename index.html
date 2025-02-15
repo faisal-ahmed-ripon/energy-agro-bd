@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fish Medicine Store</title>
+    
+    <!-- Tailwind & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="#">
+    <style>
+        /* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Product card hover effect */
+.product-card {
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Cart sidebar */
+#cartSidebar {
+    max-height: calc(100vh - 5rem);
+    overflow-y: auto;
+}
+
+/* Mobile cart styles */
+@media (max-width: 1024px) {
+    #cartSidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 70vh;
+        transform: translateY(100%);
+        transition: transform 0.3s ease-in-out;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+        z-index: 999;
+        background: white;
+    }
+
+    #cartSidebar.show-mobile {
+        transform: translateY(0);
+    }
+
+    .cart-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 998;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .cart-backdrop.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+/* Search dropdown styles */
+#searchDropdown {
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    min-width: 280px;
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* For mobile screens */
+@media (max-width: 768px) {
+    #searchDropdown {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        z-index: 1000;
+        background: white;
+        padding: 10px;
+        max-height: calc(100vh - 60px);
+    }
+
+    .search-item {
+        padding: 10px;
+    }
+
+    .search-item-name {
+        white-space: normal;
+        word-wrap: break-word;
+    }
+}
+
+#searchDropdown div:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+#searchDropdown .search-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+#searchDropdown .search-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Toast notification */
+.toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 1rem;
+    background: #4CAF50;
+    color: white;
+    border-radius: 0.5rem;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.error {
+    background: #f44336;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Menu Trigger Button */
+.menu-trigger {
+    width: 30px;
+    height: 25px;
+    margin-right: 15px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.menu-trigger span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background: currentColor;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Mobile Menu Styles */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    z-index: 1000;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.mobile-menu.show {
+    left: 0;
+}
+
+.menu-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-menu {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #f5f5f5;
+    color: #333;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-menu:hover {
+    background: #eee;
+    transform: rotate(90deg);
+}
+
+.menu-items {
+    padding: 20px;
+}
+
+.menu-items li {
+    margin-bottom: 15px;
+}
+
+.menu-items a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.menu-items a i {
+    margin-right: 12px;
+    width: 24px;
+    text-align: center;
+}
+
+.menu-items a:hover {
+    background: #f5f5f5;
+    padding-left: 20px;
+}
+
+/* Menu backdrop */
+.menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.menu-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Hide mobile menu on larger screens */
+@media (min-width: 1024px) {
+    .menu-trigger, .mobile-menu, .menu-backdrop {
+        display: none;
+    }
+}
+
+/* Modal styles */
+.modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+    max-width: 90%;
+    max-height: 90vh;
+}
+
+.modal-box {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+
+/* banner page start  */
+/* Hero Section Styles */
+.hero-section {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Video Background Styles */
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.video-background video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Desktop Video */
+.desktop-video {
+    display: block;
+}
+
+.mobile-video {
+    display: none;
+}
+
+/* Mobile Video Switch */
+@media (max-width: 768px) {
+    .desktop-video {
+        display: none;
+    }
+    
+    .mobile-video {
+        display: block;
+    }
+}
+
+/* Video Overlay - Darker for better content visibility */
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.753);
+}
+
+/* Hero Content */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Hero Slider */
+.hero-slider {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+}
+
+.hero-slide.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Slide Content */
+.slide-content {
+    max-width: 600px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.slide-title {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease 0.3s;
+    color: #00d0ff; /* Beautiful blue color */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.slide-description {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease 0.4s;
+    color: #ffffff;
+    font-weight: bolder;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+}
+
+.hero-slide.active .slide-title,
+.hero-slide.active .slide-description {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Social Icons */
+.social-icons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.social-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 179, 219, 0.571);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.social-icon:hover {
+    background: #00b4db;
+    color: white;
+    transform: translateY(-3px);
+    border-color: transparent;
+}
+
+/* CTA Button */
+.cta-button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, #00b4db, #0083b0);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+}
+
+.cta-button:hover {
+    background: linear-gradient(45deg, #0083b0, #00b4db);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 180, 219, 0.4);
+}
+
+/* Slide Image */
+.slide-image {
+    width: 45%;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateX(50px);
+    transition: all 0.6s ease 0.5s;
+}
+
+.hero-slide.active .slide-image {
+    opacity: 0.9;
+    transform: translateX(0);
+}
+
+/* Slider Navigation */
+.slider-nav button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgb(5, 209, 255);
+    color: rgb(255, 255, 255);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.slider-nav button:hover {
+    background: #00b4db;
+    color: white;
+}
+
+.prev-slide {
+    left: 20px;
+}
+
+.next-slide {
+    right: 20px;
+}
+
+/* Slider Dots */
+.slider-dots {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(0, 180, 219, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.dot.active {
+    background: #00b4db;
+    transform: scale(1.2);
+    border-color: transparent;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .slide-title {
+        font-size: 3rem;
+    }
+
+    .slide-description {
+        font-size: 1.2rem;
+    }
+
+    .slide-image {
+        width: 40%;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-slide {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    .slide-content {
+        margin-bottom: 2rem;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+
+    .slide-image {
+        width: 80%;
+        margin-top: 2rem;
+        opacity: 0.85;
+    }
+
+    .slider-nav button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .slide-title {
+        font-size: 2.5rem;
+        color: #00b4db;
+    }
+
+    .slide-description {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .slide-title {
+        font-size: 2rem;
+    }
+
+    .slide-description {
+        font-size: 1rem;
+    }
+
+    .slide-image {
+        width: 90%;
+    }
+}
+/* banner page end  */
+
+/* About Section Styles */
+/* About Section Styles */
+.about-section {
+    background: #f8f9fa;
+    overflow: hidden;
+}
+
+.about-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+/* Image Grid Styles */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.grid-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.grid-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.grid-item:hover .grid-image {
+    transform: scale(1.1);
+}
+
+/* Content Styles */
+.about-content {
+    padding: 2rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.title-underline {
+    width: 80px;
+    height: 4px;
+    background: #00b4db;
+    margin-bottom: 2rem;
+    border-radius: 2px;
+}
+
+.description {
+    font-size: 1.1rem;
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+/* Features List */
+.features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.feature-item i {
+    color: #00b4db;
+    font-size: 1.2rem;
+}
+
+.feature-item span {
+    color: #444;
+    font-weight: 500;
+}
+
+/* Button Style */
+.learn-more-btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, #00b4db, #0083b0);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+}
+
+.learn-more-btn:hover {
+    background: linear-gradient(45deg, #0083b0, #00b4db);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 180, 219, 0.4);
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .about-wrapper {
+        gap: 2rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .grid-image {
+        height: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .image-grid {
+        order: 2;
+    }
+
+    .about-content {
+        order: 1;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .title-underline {
+        margin: 0 auto 2rem;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-item {
+        justify-content: center;
+    }
+
+    .learn-more-btn {
+        margin: 0 auto;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .description {
+        font-size: 1rem;
+    }
+
+    .grid-image {
+        height: 150px;
+    }
+}
+
+/* About Section Styles */
+
+
+/* popup start  */
+
+/* Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.popup-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: popupIn 0.5s ease;
+}
+
+@keyframes popupIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.popup-title {
+    font-size: 1.8rem;
+    color: #00b4db;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.popup-description {
+    text-align: center;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Form Styles */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group textarea {
+    height: 100px;
+    resize: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #00b4db;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 180, 219, 0.1);
+}
+
+/* Send Options */
+.send-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.send-btn {
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.email {
+    background: #00b4db;
+    color: white;
+}
+
+.send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .popup-content {
+        padding: 1.5rem;
+    }
+
+    .popup-title {
+        font-size: 1.5rem;
+    }
+
+    .send-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* popup end  */
+    </style>
+</head>
+<body>
+
+
+    <!-- Popup Contact Form -->
+<div id="welcomePopup" class="popup-overlay">
+    <div class="popup-content">
+        <h2 class="popup-title">স্বাগতম Fish Medicine Store এ</h2>
+        <p class="popup-description">
+            দয়া করে নিজের বিবরণ দিয়ে ওয়েবসাইটে প্রবেশ করুন এবং পছন্দের মেডিসিন কিনুন।
+        </p>
+
+        <form id="contactForm" class="contact-form">
+            <div class="form-group">
+                <input type="text" id="name" required placeholder="আপনার নাম">
+            </div>
+            
+            <div class="form-group">
+                <input type="tel" id="phone" required placeholder="মোবাইল নাম্বার">
+            </div>
+            
+            <div class="form-group">
+                <input type="email" id="email" required placeholder="ইমেইল">
+            </div>
+            
+            <div class="form-group">
+                <textarea id="message" required placeholder="আপনার মেসেজ (যদি থাকে)"></textarea>
+            </div>
+
+            <div class="send-options">
+                <button type="button" onclick="sendViaWhatsApp()" class="send-btn whatsapp">
+                    <i class="fab fa-whatsapp"></i> WhatsApp এ পাঠান
+                </button>
+                <button type="button" onclick="sendViaEmail()" class="send-btn email">
+                    <i class="far fa-envelope"></i> ইমেইল এ পাঠান
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+    <!-- Navbar -->
+<nav class="navbar bg-base-100 fixed top-0 z-50 shadow-lg">
+    <div class="navbar-start">
+        <div class="dropdown">
+            <!-- Replace this button with new menu trigger -->
+            <div tabindex="0" role="button" class="menu-trigger lg:hidden" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Add new mobile menu here -->
+            <div class="mobile-menu">
+                <div class="menu-header">
+                    <h3 class="text-xl font-bold">Energy Agro BD</h3>
+                    <button onclick="toggleMenu()" class="close-menu">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <ul class="menu-items">
+                    <li><a href="#home" onclick="toggleMenu()">
+                        <i class="fas fa-home"></i> Home
+                    </a></li>
+                    <li><a href="#products" onclick="toggleMenu()">
+                        <i class="fas fa-box"></i> Products
+                    </a></li>
+                    <li><a href="#contact" onclick="toggleMenu()">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Keep the backdrop -->
+            <div class="menu-backdrop" onclick="toggleMenu()"></div>
+
+            <!-- Remove the old dropdown-content ul -->
+        </div>
+        <a class="btn btn-ghost text-xl">Energy Agro BD</a>
+    </div>
+    
+    <!-- Rest of the navbar remains same -->
+    <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </div>
+    
+    <div class="navbar-end">
+        <div class="form-control mr-4">
+            <div class="relative">
+                <input type="text" 
+                       id="searchInput"
+                       placeholder="Search products..." 
+                       class="input input-bordered w-24 md:w-auto">
+                <div id="searchDropdown" 
+                     class="absolute mt-1 w-full bg-base-100 shadow-lg rounded-lg hidden z-50 max-h-96 overflow-y-auto">
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-ghost btn-circle" onclick="toggleCart()">
+            <div class="indicator">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span class="badge badge-sm indicator-item" id="cartCount">0</span>
+            </div>
+        </button>
+    </div>
+</nav>
+
+<!-- banner page start  -->
+
+<!-- Hero Banner Section -->
+<section class="hero-section">
+    <!-- Background Video -->
+    <div class="video-background">
+        <!-- Desktop Video -->
+        <video autoplay muted loop playsinline class="desktop-video">
+            <source src="banner page video.mp4" type="video/mp4">
+        </video>
+        
+        <!-- Mobile Video -->
+        <video autoplay muted loop playsinline class="mobile-video">
+            <source src="responisive video.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="hero-content container mx-auto px-4">
+        <div class="hero-slider">
+            <!-- Slide 1 -->
+            <div class="hero-slide active">
+                <div class="slide-content">
+                    <h1 class="slide-title">Premium Fish Medicine</h1>
+                    <p class="slide-description">Best quality medicines for your aquarium fish</p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <button class="cta-button">Shop Now</button>
+                </div>
+                <img src="banner first.jpg" alt="Premium Fish Medicine" class="slide-image">
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="hero-slide">
+                <div class="slide-content">
+                    <h1 class="slide-title">Quality Products</h1>
+                    <p class="slide-description">Trusted by fish farmers across the country</p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <button class="cta-button">Explore More</button>
+                </div>
+                <img src="banner first image.jpg" alt="Quality Products" class="slide-image">
+                </div>
+
+            <!-- Slide 3 -->
+            <div class="hero-slide">
+                <div class="slide-content">
+                    <h1 class="slide-title">Expert Support</h1>
+                    <p class="slide-description">24/7 professional guidance for your needs</p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <button class="cta-button">Contact Us</button>
+                </div>
+                <img src="banner third.jpg" alt="Expert Support" class="slide-image">
+                </div>
+
+            <!-- Slide 4 -->
+            <div class="hero-slide">
+                <div class="slide-content">
+                    <h1 class="slide-title">Fast Delivery</h1>
+                    <p class="slide-description">Quick delivery to your doorstep</p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <button class="cta-button">Order Now</button>
+                </div>
+                <img src="banner fourth.jpg" alt="Fast Delivery" class="slide-image">
+                </div>
+
+            <!-- Slider Navigation -->
+            <div class="slider-nav">
+                <button class="prev-slide">❮</button>
+                <button class="next-slide">❯</button>
+            </div>
+
+            <!-- Slider Dots -->
+            <div class="slider-dots"></div>
+        </div>
+    </div>
+</section>
+
+
+<!-- banner page end  -->
+
+<!-- About Us Section -->
+<section class="about-section py-16">
+    <div class="container mx-auto px-4">
+        <div class="about-wrapper">
+            <!-- Image Grid -->
+            <div class="image-grid">
+                <div class="grid-item">
+                    <img src="banner first image.jpg" alt="Fish Medicine 1" class="grid-image">
+                </div>
+                <div class="grid-item">
+                    <img src="banner fourth.jpg" alt="Fish Medicine 2" class="grid-image">
+                </div>
+                <div class="grid-item">
+                    <img src="banner first.jpg" alt="Fish Medicine 3" class="grid-image">
+                </div>
+                <div class="grid-item">
+                    <img src="banner third.jpg" alt="Fish Medicine 4" class="grid-image">
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="about-content">
+                <h2 class="section-title">About Our Fish Medicine Store</h2>
+                <div class="title-underline"></div>
+                
+                <p class="description">Welcome to the leading fish medicine store in Bangladesh. With over 10 years of experience, we provide top-quality medicines and healthcare products for all types of fish.</p>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Premium Quality Products</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-truck"></i>
+                        <span>Fast Nationwide Delivery</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-headset"></i>
+                        <span>24/7 Expert Support</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certified Medicines</span>
+                    </div>
+                </div>
+
+                <button class="learn-more-btn">
+                    Learn More About Us
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- about page start  -->
+
+
+<!-- about page end  -->
+
+    <!-- Cart Backdrop -->
+    <div class="cart-backdrop" onclick="toggleCart()"></div>
+
+    <!-- Main Content -->
+    <main class="pt-16">
+        <!-- Products Section -->
+        <section id="products" class="py-8">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-8">Our Products</h2>
+                
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Products Grid -->
+                    <div class="lg:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+                         id="productsGrid">
+                        <!-- Products will be added dynamically -->
+                    </div>
+
+                    <!-- Cart Sidebar -->
+                    <div id="cartSidebar" 
+                         class="lg:w-1/4 bg-base-200 p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Shopping Cart</h3>
+                            <button onclick="toggleCart()" class="btn btn-ghost btn-sm lg:hidden">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="cartItems" class="space-y-4">
+                            <!-- Cart items will be added dynamically -->
+                        </div>
+                        <div class="mt-4 pt-4 border-t">
+                            <div class="text-xl font-bold mb-4">
+                                Total: ৳<span id="cartTotal">0</span>
+                            </div>
+                            <button onclick="submitOrder()" 
+                                    class="btn btn-primary w-full">
+                                Submit Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Modal -->
+    <dialog id="productModal" class="modal">
+        <!-- Modal content will be added dynamically -->
+    </dialog>
+
+    <!-- Scripts -->
+    <script>
+        const products = [
+    {
+        id: 1,
+        name: "Aqua Care Plus",
+        description: "Premium quality medicine for treating common fish diseases. Effective against bacterial and fungal infections.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 40,
+            "250g": 90,
+            "500g": 160,
+            "1kg": 300
+        }
+    },
+    {
+        id: 2,
+        name: "Fish Vita Gold",
+        description: "Essential vitamins and minerals supplement for healthy fish growth and immune system boost.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 35,
+            "250g": 80,
+            "500g": 150,
+            "1kg": 280
+        }
+    },
+    {
+        id: 3,
+        name: "Parasite Clear",
+        description: "Effective treatment for external and internal parasites in fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 45,
+            "250g": 100,
+            "500g": 180,
+            "1kg": 340
+        }
+    },
+    {
+        id: 4,
+        name: "Growth Booster",
+        description: "Specially formulated to enhance fish growth and development.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 50,
+            "250g": 110,
+            "500g": 200,
+            "1kg": 380
+        }
+    },
+    {
+        id: 5,
+        name: "Immune Shield",
+        description: "Strengthens fish immune system and prevents diseases.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 55,
+            "250g": 120,
+            "500g": 220,
+            "1kg": 420
+        }
+    },
+    {
+        id: 6,
+        name: "Water Clear Pro",
+        description: "Makes aquarium water crystal clear and removes harmful chemicals.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 30,
+            "250g": 70,
+            "500g": 130,
+            "1kg": 240
+        }
+    },
+    {
+        id: 7,
+        name: "Stress Guard",
+        description: "Reduces stress in fish during transportation and environmental changes.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 40,
+            "250g": 90,
+            "500g": 170,
+            "1kg": 320
+        }
+    },
+    {
+        id: 8,
+        name: "Color Enhance Plus",
+        description: "Enhances natural colors of ornamental fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 45,
+            "250g": 100,
+            "500g": 190,
+            "1kg": 360
+        }
+    },
+    {
+        id: 9,
+        name: "Gill Care",
+        description: "Treats gill problems and improves breathing in fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 50,
+            "250g": 110,
+            "500g": 210,
+            "1kg": 400
+        }
+    },
+    {
+        id: 10,
+        name: "Breeding Support",
+        description: "Promotes healthy breeding conditions and fry development.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 60,
+            "250g": 130,
+            "500g": 250,
+            "1kg": 480
+        }
+    },
+    {
+        id: 11,
+        name: "pH Balance Pro",
+        description: "Maintains optimal pH levels in aquarium water.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 35,
+            "250g": 80,
+            "500g": 150,
+            "1kg": 280
+        }
+    },
+    {
+        id: 12,
+        name: "Algae Control",
+        description: "Controls and prevents algae growth in aquariums.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 40,
+            "250g": 90,
+            "500g": 170,
+            "1kg": 320
+        }
+    },
+    {
+        id: 13,
+        name: "Wound Heal",
+        description: "Fast-acting medicine for healing wounds and injuries in fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 55,
+            "250g": 120,
+            "500g": 230,
+            "1kg": 440
+        }
+    },
+    {
+        id: 14,
+        name: "Scale Guard",
+        description: "Protects and maintains healthy fish scales.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 45,
+            "250g": 100,
+            "500g": 190,
+            "1kg": 360
+        }
+    },
+    {
+        id: 15,
+        name: "Oxygen Plus",
+        description: "Increases oxygen levels in aquarium water.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 30,
+            "250g": 70,
+            "500g": 130,
+            "1kg": 240
+        }
+    },
+    {
+        id: 16,
+        name: "Fin Rot Treatment",
+        description: "Effective treatment for fin and tail rot in fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 50,
+            "250g": 110,
+            "500g": 210,
+            "1kg": 400
+        }
+    },
+    {
+        id: 17,
+        name: "White Spot Cure",
+        description: "Treats ich (white spot disease) in fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 55,
+            "250g": 120,
+            "500g": 230,
+            "1kg": 440
+        }
+    },
+    {
+        id: 18,
+        name: "Appetite Boost",
+        description: "Stimulates appetite in fish and improves digestion.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 40,
+            "250g": 90,
+            "500g": 170,
+            "1kg": 320
+        }
+    },
+    {
+        id: 19,
+        name: "Bacteria Control",
+        description: "Controls harmful bacteria in aquarium water.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 45,
+            "250g": 100,
+            "500g": 190,
+            "1kg": 360
+        }
+    },
+    {
+        id: 20,
+        name: "Fungus Clear",
+        description: "Treats fungal infections in fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 50,
+            "250g": 110,
+            "500g": 210,
+            "1kg": 400
+        }
+    },
+    {
+        id: 21,
+        name: "Ammonia Control",
+        description: "Reduces harmful ammonia levels in aquarium water.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 35,
+            "250g": 80,
+            "500g": 150,
+            "1kg": 280
+        }
+    },
+    {
+        id: 22,
+        name: "Nitrite Reducer",
+        description: "Reduces harmful nitrite levels in aquarium water.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 40,
+            "250g": 90,
+            "500g": 170,
+            "1kg": 320
+        }
+    },
+    {
+        id: 23,
+        name: "Scale Shine",
+        description: "Makes fish scales shiny and healthy.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 45,
+            "250g": 100,
+            "500g": 190,
+            "1kg": 360
+        }
+    },
+    {
+        id: 24,
+        name: "Slime Coat Plus",
+        description: "Protects and maintains fish's natural slime coat.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 50,
+            "250g": 110,
+            "500g": 210,
+            "1kg": 400
+        }
+    },
+    {
+        id: 25,
+        name: "Quick Heal",
+        description: "Fast-acting general cure for common fish diseases.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 55,
+            "250g": 120,
+            "500g": 230,
+            "1kg": 440
+        }
+    },
+    {
+        id: 26,
+        name: "Digestion Aid",
+        description: "Improves digestion and prevents constipation in fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 40,
+            "250g": 90,
+            "500g": 170,
+            "1kg": 320
+        }
+    },
+    {
+        id: 27,
+        name: "Spawn Inducer",
+        description: "Promotes spawning in breeding fish.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 60,
+            "250g": 130,
+            "500g": 250,
+            "1kg": 480
+        }
+    },
+    {
+        id: 28,
+        name: "Tank Clean Pro",
+        description: "Complete solution for aquarium cleaning and maintenance.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 35,
+            "250g": 80,
+            "500g": 150,
+            "1kg": 280
+        }
+    },
+    {
+        id: 29,
+        name: "Mineral Plus",
+        description: "Essential minerals supplement for fish health.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 40,
+            "250g": 90,
+            "500g": 170,
+            "1kg": 320
+        }
+    },
+    {
+        id: 30,
+        name: "Complete Care",
+        description: "All-in-one solution for fish health and aquarium maintenance.",
+        image: "https://placehold.co/300x200",
+        prices: {
+            "100g": 65,
+            "250g": 140,
+            "500g": 270,
+            "1kg": 520
+        }
+    }
+];
+
+// Local Storage Keys
+const CART_STORAGE_KEY = 'fishMedicineCart';
+
+// Initialize cart from localStorage
+let cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || [];
+
+// Display products in grid
+function displayProducts(productsToShow = products) {
+    const productsGrid = document.getElementById('productsGrid');
+    
+    productsGrid.innerHTML = productsToShow.map(product => `
+        <div class="card product-card bg-base-100 shadow-xl">
+            <figure class="px-4 pt-4">
+                <img src="${product.image}" 
+                     alt="${product.name}" 
+                     class="rounded-xl h-48 w-full object-cover">
+            </figure>
+            <div class="card-body">
+                <h2 class="card-title">${product.name}</h2>
+                <p class="text-sm text-gray-600">Starting from ৳${Math.min(...Object.values(product.prices))}</p>
+                <div class="card-actions justify-end">
+                    <button onclick="showProductModal(${product.id})" 
+                            class="btn btn-primary">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Show product modal
+function showProductModal(productId) {
+    const product = products.find(p => p.id === productId);
+    const modal = document.getElementById('productModal');
+    
+    modal.innerHTML = `
+        <div class="modal-box relative">
+            <h3 class="font-bold text-lg mb-4">${product.name}</h3>
+            <img src="${product.image}" 
+                 alt="${product.name}" 
+                 class="w-full h-48 object-cover rounded-lg mb-4">
+            <p class="mb-4">${product.description}</p>
+            
+            <div class="space-y-4">
+                <div class="form-control">
+                    <label class="label">Select Size</label>
+                    <select id="sizeSelect" 
+                            class="select select-bordered" 
+                            onchange="updatePrice(${productId})">
+                        ${Object.entries(product.prices)
+                            .map(([size, price]) => `
+                                <option value="${size}">
+                                    ${size} - ৳${price}
+                                </option>
+                            `).join('')}
+                    </select>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">Quantity</label>
+                    <input type="number" 
+                           id="quantityInput" 
+                           class="input input-bordered" 
+                           value="1" 
+                           min="1"
+                           onchange="updatePrice(${productId})">
+                </div>
+                
+                <div class="text-xl font-bold">
+                    Total: ৳<span id="modalTotal">0</span>
+                </div>
+            </div>
+            
+            <div class="modal-action">
+                <button onclick="addToCart(${productId})" 
+                        class="btn btn-primary">
+                    Add to Cart
+                </button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    `;
+    
+    modal.showModal();
+    updatePrice(productId);
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.close();
+        }
+    });
+}
+
+
+// Update price in modal
+function updatePrice(productId) {
+    const product = products.find(p => p.id === productId);
+    const size = document.getElementById('sizeSelect').value;
+    const quantity = parseInt(document.getElementById('quantityInput').value);
+    const total = product.prices[size] * quantity;
+    
+    document.getElementById('modalTotal').textContent = total;
+}
+
+// Close modal
+function closeModal() {
+    document.getElementById('productModal').close();
+}
+
+// Add to cart
+function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    const size = document.getElementById('sizeSelect').value;
+    const quantity = parseInt(document.getElementById('quantityInput').value);
+    const price = product.prices[size];
+    
+    cart.push({
+        id: productId,
+        name: product.name,
+        size: size,
+        quantity: quantity,
+        price: price,
+        total: price * quantity
+    });
+    
+    saveCart();
+    updateCartDisplay();
+    closeModal();
+    showToast('Product added to cart!');
+}
+
+// Save cart to localStorage
+function saveCart() {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+}
+
+// Update cart display
+function updateCartDisplay() {
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const cartCount = document.getElementById('cartCount');
+    
+    let total = 0;
+    
+    cartItems.innerHTML = cart.map((item, index) => {
+        total += item.total;
+        return `
+            <div class="bg-base-100 p-4 rounded-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-bold">${item.name}</h4>
+                        <p class="text-sm">${item.size} x ${item.quantity}</p>
+                        <p class="text-primary">৳${item.total}</p>
+                    </div>
+                    <button onclick="removeFromCart(${index})" 
+                            class="btn btn-sm btn-error">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    cartTotal.textContent = total;
+    cartCount.textContent = cart.length;
+}
+
+// Remove from cart
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    saveCart();
+    updateCartDisplay();
+    showToast('Product removed from cart!');
+}
+
+// Toggle cart sidebar
+function toggleCart() {
+    const cartSidebar = document.getElementById('cartSidebar');
+    const backdrop = document.querySelector('.cart-backdrop');
+    
+    if (window.innerWidth < 1024) {
+        cartSidebar.classList.toggle('show-mobile');
+        backdrop.classList.toggle('show');
+        document.body.style.overflow = cartSidebar.classList.contains('show-mobile') ? 'hidden' : '';
+    }
+}
+
+// Toggle mobile menu
+function toggleMenu() {
+    const menu = document.querySelector('.mobile-menu');
+    const backdrop = document.querySelector('.menu-backdrop');
+    const trigger = document.querySelector('.menu-trigger');
+    
+    menu.classList.toggle('show');
+    backdrop.classList.toggle('show');
+    document.body.style.overflow = menu.classList.contains('show') ? 'hidden' : '';
+}
+
+
+// Submit order
+function submitOrder() {
+    if (cart.length === 0) {
+        showToast('Cart is empty!', 'error');
+        return;
+    }
+    
+    // Prepare message
+    let message = "New Order:\n\n";
+    let total = 0;
+    
+    cart.forEach(item => {
+        message += `${item.name} (${item.size} x ${item.quantity}): ৳${item.total}\n`;
+        total += item.total;
+    });
+    
+    message += `\nTotal: ৳${total}`;
+
+    // Show order method selection modal
+    const modal = document.createElement('dialog');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Choose Order Method</h3>
+            <div class="flex flex-col gap-4">
+                <button onclick="sendWhatsApp('${encodeURIComponent(message)}')" class="btn btn-primary">
+                    <i class="fab fa-whatsapp mr-2"></i> Send via WhatsApp
+                </button>
+                <button onclick="sendEmail('${encodeURIComponent(message)}')" class="btn btn-primary">
+                    <i class="fas fa-envelope mr-2"></i> Send via Email
+                </button>
+            </div>
+            <div class="modal-action">
+                <button onclick="this.closest('dialog').close()" class="btn">Close</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    `;
+    document.body.appendChild(modal);
+    modal.showModal();
+}
+
+// Send via WhatsApp
+function sendWhatsApp(message) {
+    window.open(`https://wa.me/8801890393486?text=${message}`, '_blank');
+    clearCart();
+}
+
+// Send via Email
+function sendEmail(message) {
+    window.location.href = `mailto:faisal.ahmed7405@gmail.com?subject=New Order&body=${message}`;
+    clearCart();
+}
+
+// Clear cart after order
+function clearCart() {
+    cart = [];
+    saveCart();
+    updateCartDisplay();
+    showToast('Order submitted successfully!');
+    document.querySelector('.modal').close();
+}
+
+// Show toast notification
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Search functionality
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const searchDropdown = document.getElementById('searchDropdown');
+    
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        if (searchTerm.length < 1) {
+            searchDropdown.classList.add('hidden');
+            displayProducts(products);
+            return;
+        }
+        
+        const filteredProducts = products.filter(product => 
+            product.name.toLowerCase().includes(searchTerm) ||
+            product.description.toLowerCase().includes(searchTerm)
+        );
+        
+        if (filteredProducts.length > 0) {
+            searchDropdown.classList.remove('hidden');
+            showSearchSuggestions(filteredProducts, searchTerm);
+            displayProducts(filteredProducts);
+        } else {
+            searchDropdown.innerHTML = `
+                <div class="p-4 text-gray-500">
+                    No products found
+                </div>
+            `;
+            searchDropdown.classList.remove('hidden');
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target)) {
+            searchDropdown.classList.add('hidden');
+        }
+    });
+}
+
+// Show search suggestions
+function showSearchSuggestions(filteredProducts, searchTerm) {
+    const searchDropdown = document.getElementById('searchDropdown');
+    
+    searchDropdown.innerHTML = filteredProducts.map(product => `
+        <div class="search-item hover:bg-base-200">
+            <img src="${product.image}" 
+                 alt="${product.name}" 
+                 class="w-12 h-12 object-cover rounded">
+            <div class="search-item-details">
+                <div class="search-item-name font-medium">${highlightMatch(product.name, searchTerm)}</div>
+                <div class="text-sm text-gray-500">
+                    Starting from ৳${Math.min(...Object.values(product.prices))}
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                    ${product.description.substring(0, 60)}...
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Add click event for each item
+    searchDropdown.querySelectorAll('.search-item').forEach((item, index) => {
+        item.onclick = () => selectProduct(filteredProducts[index].id);
+    });
+}
+
+// Highlight matching text
+function highlightMatch(text, searchTerm) {
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="bg-primary/20">$1</span>');
+}
+
+// Select product from search
+function selectProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+        document.getElementById('searchInput').value = product.name;
+        document.getElementById('searchDropdown').classList.add('hidden');
+        displayProducts([product]);
+        document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// Initialize on page load
+window.addEventListener('load', () => {
+    initializeSearch();
+    displayProducts();
+    updateCartDisplay();
+});
+
+
+// banner page start 
+// Hero Slider Functionality
+function initHeroSlider() {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelector('.slider-dots');
+    const prevBtn = document.querySelector('.prev-slide');
+    const nextBtn = document.querySelector('.next-slide');
+    let currentSlide = 0;
+
+    // Create dots
+    slides.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = `dot ${index === 0 ? 'active' : ''}`;
+        dot.addEventListener('click', () => goToSlide(index));
+        dots.appendChild(dot);
+    });
+
+    // Update dots
+    function updateDots() {
+        document.querySelectorAll('.dot').forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentSlide);
+        });
+    }
+
+    // Go to specific slide
+    function goToSlide(index) {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = index;
+        if (currentSlide >= slides.length) currentSlide = 0;
+        if (currentSlide < 0) currentSlide = slides.length - 1;
+        slides[currentSlide].classList.add('active');
+        updateDots();
+    }
+
+    // Next slide
+    function nextSlide() {
+        goToSlide(currentSlide + 1);
+    }
+
+    // Previous slide
+    function prevSlide() {
+        goToSlide(currentSlide - 1);
+    }
+
+    // Add button listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    // Auto slide
+    setInterval(nextSlide, 5000);
+
+    // Touch events for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.querySelector('.hero-slider').addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.querySelector('.hero-slider').addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchStartX - touchEndX > 50) {
+            nextSlide();
+        } else if (touchEndX - touchStartX > 50) {
+            prevSlide();
+        }
+    });
+}
+
+// Function to handle video loading based on device
+function handleVideoLoading() {
+    const desktopVideo = document.querySelector('.desktop-video');
+    const mobileVideo = document.querySelector('.mobile-video');
+    
+    // Function to load appropriate video
+    function loadAppropriateVideo() {
+        if (window.innerWidth <= 768) {
+            desktopVideo.pause();
+            mobileVideo.play();
+        } else {
+            mobileVideo.pause();
+            desktopVideo.play();
+        }
+    }
+    
+    // Load video on page load
+    loadAppropriateVideo();
+    
+    // Load video on window resize
+    window.addEventListener('resize', loadAppropriateVideo);
+}
+
+// Initialize on page load
+window.addEventListener('load', handleVideoLoading);
+
+// Initialize on page load
+window.addEventListener('load', initHeroSlider);
+
+
+// banner page end 
+
+// popup start 
+
+// Check if form is already submitted
+if (!localStorage.getItem('formSubmitted')) {
+    document.getElementById('welcomePopup').style.display = 'flex';
+} else {
+    document.getElementById('welcomePopup').style.display = 'none';
+}
+
+// WhatsApp Send Function
+function sendViaWhatsApp() {
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    const message = document.getElementById('message').value;
+
+    if (validateForm()) {
+        const text = `Name: ${name}%0APhone: ${phone}%0AEmail: ${email}%0AMessage: ${message}`;
+        window.open(`https://wa.me/+8801890393486?text=${text}`);
+        submitForm();
+    }
+}
+
+// Email Send Function
+function sendViaEmail() {
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    const message = document.getElementById('message').value;
+
+    if (validateForm()) {
+        const mailtoLink = `mailto:faisal.ahmed7405@gmail.com?subject=New Contact Form Submission&body=Name: ${name}%0D%0APhone: ${phone}%0D%0AEmail: ${email}%0D%0AMessage: ${message}`;
+        window.location.href = mailtoLink;
+        submitForm();
+    }
+}
+
+// Form Validation
+function validateForm() {
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+
+    if (!name || !phone || !email) {
+        alert('দয়া করে সব তথ্য পূরণ করুন!');
+        return false;
+    }
+
+    if (!email.includes('@')) {
+        alert('দয়া করে সঠিক ইমেইল দিন!');
+        return false;
+    }
+
+    return true;
+}
+
+// Submit Form
+function submitForm() {
+    localStorage.setItem('formSubmitted', 'true');
+    document.getElementById('welcomePopup').style.display = 'none';
+}
+// popup end 
+    </script>
+</body>
+</html>
