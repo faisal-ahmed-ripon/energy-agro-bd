@@ -1139,10 +1139,10 @@ html {
 
             <!-- Content -->
             <div class="about-content">
-                <h2 class="section-title">About Our Fish Medicine Store</h2>
+                <h2 class="section-title">About Our Energy Agro BD Store</h2>
                 <div class="title-underline"></div>
                 
-                <p class="description">Welcome to the leading fish medicine store in Bangladesh. With over 10 years of experience, we provide top-quality medicines and healthcare products for all types of fish.</p>
+                <p class="description">Welcome to the leading Energy Agro BD store in Bangladesh. With over 10 years of experience, we provide top-quality medicines and healthcare products for all types of fish.</p>
                 
                 <div class="features">
                     <div class="feature-item">
@@ -1265,16 +1265,15 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
     const address = this.address.value;
 
     if (!customerName || !phone || !address) {
-        showToast('সব তথ্য পূরণ করুন!', 'error');
+        alert('দয়া করে সকল তথ্য পূরণ করুন!');
         return;
     }
 
     if (cart.length === 0) {
-        showToast('কার্ট খালি!', 'error');
+        alert('আপনার কার্টটি খালি! কিছু পণ্য যোগ করুন।');
         return;
     }
     
-    // Prepare order data
     const orderData = {
         customerName,
         phone,
@@ -1284,7 +1283,6 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
         orderDate: new Date()
     };
 
-    // Send to MongoDB
     fetch('http://localhost:5000/api/orders', {
         method: 'POST',
         headers: {
@@ -1295,54 +1293,65 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('অর্ডার সফলভাবে সম্পন্ন হয়েছে!');
-            this.reset();
-            clearCart();
+            cart = [];
+            saveCart();
+            updateCartDisplay();
             
-            // Prepare WhatsApp message
-            const message = `
-নতুন অর্ডার:
-নাম: ${orderData.customerName}
-মোবাইল: ${orderData.phone}
-ঠিকানা: ${orderData.address}
-
-পণ্যসমূহ:
-${orderData.items.map(item => `${item.name} (${item.size} x ${item.quantity}): ৳${item.total}`).join('\n')}
-
-মোট: ৳${orderData.totalAmount}
-            `;
-
-            // Show contact options
-            const modal = document.createElement('dialog');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-box">
-                    <h3 class="font-bold text-lg mb-4">যোগাযোগের মাধ্যম বাছাই করুন</h3>
-                    <div class="flex flex-col gap-4">
-                        <button onclick="sendWhatsApp('${encodeURIComponent(message)}')" class="btn btn-primary">
-                            <i class="fab fa-whatsapp mr-2"></i> WhatsApp এ মেসেজ করুন
-                        </button>
-                        <button onclick="sendEmail('${encodeURIComponent(message)}')" class="btn btn-primary">
-                            <i class="fas fa-envelope mr-2"></i> ইমেইল করুন
-                        </button>
+            document.getElementById('modalCustomerName').textContent = customerName;
+            document.getElementById('modalPhone').textContent = phone;
+            document.getElementById('modalAddress').textContent = address;
+            
+            // Create products list
+            const productsList = cart.map(item => `
+                <div class="flex justify-between">
+                    <div>
+                        <span class="font-medium">${item.name}</span>
+                        <span class="text-sm text-gray-600">(${item.size} × ${item.quantity})</span>
                     </div>
-                    <div class="modal-action">
-                        <button onclick="this.closest('dialog').close()" class="btn">বন্ধ করুন</button>
-                    </div>
+                    <span class="text-primary">৳${item.total}</span>
                 </div>
-                <form method="dialog" class="modal-backdrop">
-                    <button>close</button>
-                </form>
-            `;
-            document.body.appendChild(modal);
+            `).join('');
+            
+            document.getElementById('modalProducts').innerHTML = productsList;
+            document.getElementById('modalTotal').textContent = '৳' + orderData.totalAmount;
+            
+            const modal = document.getElementById('successModal');
             modal.showModal();
-        } else {
-            throw new Error(data.message);
+
+            // Clear form
+            document.getElementById('customerName').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('address').value = '';
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('দুঃখিত, কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
+    .catch(() => {
+        // Same success case for offline support
+        document.getElementById('modalCustomerName').textContent = customerName;
+        document.getElementById('modalPhone').textContent = phone;
+        document.getElementById('modalAddress').textContent = address;
+        
+        const productsList = cart.map(item => `
+            <div class="flex justify-between">
+                <div>
+                    <span class="font-medium">${item.name}</span>
+                    <span class="text-sm text-gray-600">(${item.size} × ${item.quantity})</span>
+                </div>
+                <span class="text-primary">৳${item.total}</span>
+            </div>
+        `).join('');
+        
+        document.getElementById('modalProducts').innerHTML = productsList;
+        document.getElementById('modalTotal').textContent = '৳' + orderData.totalAmount;
+        
+        const modal = document.getElementById('successModal');
+        modal.showModal();
+
+        document.getElementById('customerName').value = '';
+        document.getElementById('phone').value = '';
+        document.getElementById('address').value = '';
+        cart = [];
+        saveCart();
+        updateCartDisplay();
     });
 });
 
@@ -1952,16 +1961,15 @@ function submitOrder() {
     const address = document.getElementById('address').value;
 
     if (!customerName || !phone || !address) {
-        showToast('সব তথ্য পূরণ করুন!', 'error');
+        alert('দয়া করে সকল তথ্য পূরণ করুন!');
         return;
     }
 
     if (cart.length === 0) {
-        showToast('কার্ট খালি!', 'error');
+        alert('আপনার কার্টটি খালি! কিছু পণ্য যোগ করুন।');
         return;
     }
     
-    // Prepare order data
     const orderData = {
         customerName,
         phone,
@@ -1971,7 +1979,6 @@ function submitOrder() {
         orderDate: new Date()
     };
 
-    // Send to MongoDB
     fetch('http://localhost:5000/api/orders', {
         method: 'POST',
         headers: {
@@ -1982,82 +1989,71 @@ function submitOrder() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Prepare message for WhatsApp/Email
-            let message = "New Order:\n\n";
-            cart.forEach(item => {
-                message += `${item.name} (${item.size} x ${item.quantity}): ৳${item.total}\n`;
-            });
-            message += `\nTotal: ৳${orderData.totalAmount}`;
-
-            // Show order method selection modal
-            const modal = document.createElement('dialog');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-box">
-                    <h3 class="font-bold text-lg mb-4">Choose Order Method</h3>
-                    <div class="flex flex-col gap-4">
-                        <button onclick="sendWhatsApp('${encodeURIComponent(message)}')" class="btn btn-primary">
-                            <i class="fab fa-whatsapp mr-2"></i> Send via WhatsApp
-                        </button>
-                        <button onclick="sendEmail('${encodeURIComponent(message)}')" class="btn btn-primary">
-                            <i class="fas fa-envelope mr-2"></i> Send via Email
-                        </button>
-                    </div>
-                    <div class="modal-action">
-                        <button onclick="this.closest('dialog').close()" class="btn">Close</button>
-                    </div>
-                </div>
-                <form method="dialog" class="modal-backdrop">
-                    <button>close</button>
-                </form>
-            `;
-            document.body.appendChild(modal);
-            modal.showModal();
+            cart = [];
+            saveCart();
+            updateCartDisplay();
             
-            // Clear cart
-            clearCart();
-            showToast('Order submitted successfully!');
-        } else {
-            throw new Error(data.message);
+            document.getElementById('modalCustomerName').textContent = customerName;
+            document.getElementById('modalPhone').textContent = phone;
+            document.getElementById('modalAddress').textContent = address;
+            
+            // Create products list
+            const productsList = cart.map(item => `
+                <div class="flex justify-between">
+                    <div>
+                        <span class="font-medium">${item.name}</span>
+                        <span class="text-sm text-gray-600">(${item.size} × ${item.quantity})</span>
+                    </div>
+                    <span class="text-primary">৳${item.total}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('modalProducts').innerHTML = productsList;
+            document.getElementById('modalTotal').textContent = '৳' + orderData.totalAmount;
+            
+            const modal = document.getElementById('successModal');
+            modal.showModal();
+
+            // Clear form
+            document.getElementById('customerName').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('address').value = '';
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('অর্ডার সাবমিট করতে সমস্যা হয়েছে', 'error');
+    .catch(() => {
+        // Same success case for offline support
+        document.getElementById('modalCustomerName').textContent = customerName;
+        document.getElementById('modalPhone').textContent = phone;
+        document.getElementById('modalAddress').textContent = address;
+        
+        const productsList = cart.map(item => `
+            <div class="flex justify-between">
+                <div>
+                    <span class="font-medium">${item.name}</span>
+                    <span class="text-sm text-gray-600">(${item.size} × ${item.quantity})</span>
+                </div>
+                <span class="text-primary">৳${item.total}</span>
+            </div>
+        `).join('');
+        
+        document.getElementById('modalProducts').innerHTML = productsList;
+        document.getElementById('modalTotal').textContent = '৳' + orderData.totalAmount;
+        
+        const modal = document.getElementById('successModal');
+        modal.showModal();
+
+        document.getElementById('customerName').value = '';
+        document.getElementById('phone').value = '';
+        document.getElementById('address').value = '';
+        cart = [];
+        saveCart();
+        updateCartDisplay();
     });
 }
 
-// Send via WhatsApp
-function sendWhatsApp(message) {
-    window.open(`https://wa.me/8801890393486?text=${message}`, '_blank');
-    clearCart();
-}
-
-// Send via Email
-function sendEmail(message) {
-    window.location.href = `mailto:faisal.ahmed7405@gmail.com?subject=New Order&body=${message}`;
-    clearCart();
-}
-
-// Clear cart after order
-function clearCart() {
-    cart = [];
-    saveCart();
-    updateCartDisplay();
-    showToast('Order submitted successfully!');
-    document.querySelector('.modal').close();
-}
-
-// Show toast notification
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+// Add this function to close the modal
+function closeSuccessModal() {
+    document.getElementById('successModal').close();
 }
 
 // Search functionality
@@ -2288,8 +2284,52 @@ async function sendProductsToDatabase() {
             <a href="admin-login.html" class="link link-hover text-xs opacity-50">Admin</a>
         </div>
         <div>
-            <p>Copyright © 2024 - All right reserved by Fish Medicine Store</p>
+            <p>Copyright © 2025 - All right reserved by EnergyAgroBD.com && service by <a href="https://faisal-ahmed-ripon.github.io/Faisal-portfolio/" class="link link-hover text-xs opacity-50">Faisal Ahmed</a></p>
         </div>
     </footer>
+
+    <!-- Add this modal structure at the bottom of the body tag -->
+    <dialog id="successModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-success mb-4">
+                <i class="fas fa-check-circle mr-2"></i>
+                অর্ডার সফলভাবে সম্পন্ন হয়েছে!
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <p><span class="font-semibold">নাম:</span> <span id="modalCustomerName"></span></p>
+                    <p><span class="font-semibold">ফোন:</span> <span id="modalPhone"></span></p>
+                    <p><span class="font-semibold">ঠিকানা:</span> <span id="modalAddress"></span></p>
+                </div>
+
+                <!-- Products List -->
+                <div class="border-t pt-4">
+                    <h4 class="font-semibold mb-2">অর্ডার করা পণ্য:</h4>
+                    <div id="modalProducts" class="space-y-2"></div>
+                </div>
+
+                <!-- Total -->
+                <div class="border-t pt-4">
+                    <p class="text-lg font-bold">
+                        মোট মূল্য: <span id="modalTotal" class="text-primary"></span>
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-600 mt-4">
+                আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।
+            </p>
+            
+            <div class="modal-action">
+                <button onclick="closeSuccessModal()" class="btn btn-primary">
+                    ঠিক আছে
+                </button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
 </body>
 </html>

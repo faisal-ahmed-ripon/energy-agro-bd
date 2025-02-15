@@ -31,7 +31,10 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/fishMedicineStore')
+mongoose.connect('mongodb://127.0.0.1:27017/fishMedicineStore', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.error('MongoDB Connection Error:', err));
 
